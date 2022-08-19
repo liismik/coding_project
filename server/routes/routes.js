@@ -59,7 +59,9 @@ router.post('/register', async (req, res) => {
     if(!password || (password.length < 8))
         return res.status(400).send('Password is too short! Must be more 8 or more characters long.')
 
+
     const hashedPassword = await bcrypt.hash(password, 10)
+
 
     const registeredUser = new User({
         email: email,
@@ -93,7 +95,7 @@ router.post('/register', async (req, res) => {
     });
 
     console.log("email sent");*/
-    return res.status(201);
+    return res.status(200);
 })
 
 router.post('/login', async (req, res) => {
@@ -108,22 +110,21 @@ router.post('/login', async (req, res) => {
 
     try {
         if ((await bcrypt.compare(password, user.password)) && user.verified) {
-            console.log('All good');
             const timestamp = new Date().getTime();
+
+            res.status(200).json('Successfully logged in!');
+
             await User.updateOne({ 'email': email }, { $push: { 'loginHistory': timestamp } })
 
-            res.status(200);
+            return
         } else if (!user.verified) {
-            console.log('Verification none');
-            return res.status(400).json('Please check your email and confirm your registration first!');
+            return res.status(400).json('Please check your email and verify your account first!');
         } else {
-            console.log('Login fail');
             return res.status(400).json('Login failed!');
         }
     } catch (error) {
         res.status(400).json(`Something went wrong... ${error}`);
     }
-    return res.status(201);
 })
 
 router.post('/confirm-account', async (req, res) => {
@@ -138,14 +139,14 @@ router.post('/confirm-account', async (req, res) => {
 
     try {
         if (await bcrypt.compare(password, user.password)) {
-            console.log('Confirmation success');
+            res.status(200).json('Account successfully confirmed!');
 
-            res.status(200);
+            await User.updateOne({ 'email': email }, { 'verified': true });
 
-            await User.updateOne({ 'email': email }, { 'verified': true })
+            return
         } else {
             console.log('Confirmation failed');
-            return res.status(400).json('Login failed!');
+            return res.status(400).json('Confirmation failed!');
         }
     } catch (error) {
         res.status(400).json(`Something went wrong... ${error}`);
@@ -153,7 +154,7 @@ router.post('/confirm-account', async (req, res) => {
 })
 
 router.get('/users', async (req, res) => {
-    const users = await User.find({}, { 'email': 1 });
+    const users = await User.find({}, { 'email': 1, 'verified': 1 });
     res.json(users);
 })
 
@@ -166,6 +167,16 @@ router.get('/users/:id', async (req, res) => {
     })
 
     res.json(readableDateTimes);
+})
+
+router.post('/users/delete-user', async (req, res) => {
+    try {
+        await User.deleteOne({_id: req.body.userId});
+        return res.status(200).json('User successfully deleted!')
+    } catch {
+        return res.status(400).json('Error while deleting user!');
+    }
+
 })
 
 module.exports = router

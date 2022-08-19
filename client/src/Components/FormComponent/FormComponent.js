@@ -1,8 +1,12 @@
 import React from "react";
 import { Link, useNavigate } from 'react-router-dom';
-import { Button, Form, Input, message } from 'antd';
+import { Button, Form, Input } from 'antd';
 import './FormComponent.css';
+import {toast, ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {default as axios} from 'axios';
+
+toast.configure();
 
 function FormComponent(props) {
     const navigate = useNavigate();
@@ -11,14 +15,11 @@ function FormComponent(props) {
     async function userAction(api, values, navigateTo){
         await axios.post(api, values)
             .then((response) => {
-                if(response){
-                    message.info(response);
-                    console.log('response', response);
-                }
+                toast.success(response, {position: 'top-center'});
                 navigate(navigateTo);
             })
             .catch((err) => {
-                message.info(err.response.data);
+                toast.error(err.response.data, {position: 'top-center'});
             })
     }
 
@@ -36,13 +37,12 @@ function FormComponent(props) {
             case 'Confirm account':
                 await userAction('/app/confirm-account', values, '/login');
                 return
-            default:
-                return
         }
     }
 
     const onFinishFailed = (errorInfo: any) => {
-        console.log('Error', errorInfo)
+        toast.error('Something went wrong...');
+        console.log(errorInfo);
     }
 
     return (
@@ -51,6 +51,10 @@ function FormComponent(props) {
                 ? (
                     <Button type='primary'>
                         <Link to='/register'>Register</Link>
+                    </Button>
+                ) : ((title !== 'Login') && (title !== 'Confirm account')) ? (
+                    <Button type='primary'>
+                        <Link to='/login'>Login</Link>
                     </Button>
                 )
                 : null
@@ -61,7 +65,6 @@ function FormComponent(props) {
                     name="basic"
                     labelCol={{ span: 8 }}
                     wrapperCol={{ span: 16 }}
-                    initialValues={{ remember: true }}
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}
                     autoComplete="off"
@@ -97,7 +100,6 @@ function FormComponent(props) {
                         </Button>
                     </Form.Item>
                 </Form>
-                <div></div>
             </div>
         </div>
     )

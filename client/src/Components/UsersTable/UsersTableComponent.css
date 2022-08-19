@@ -1,17 +1,51 @@
-.usersTableContainer {
-    display: flex;
-    justify-content: center;
-}
-
 .title {
     display: flex;
     justify-content: center;
 }
 
-.listContent {
-    text-align: center;
+.usersTable {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .listItem {
     color: black;
+}
+
+.activityStatus {
+    margin-left: 12px;
+}
+
+.deleteButton {
+    text-align: center;
+    color: red;
+    cursor: pointer;
+}
+
+.deleteButton:hover {
+    color: white;
+    background-color: red;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.confirmationModal {
+    bottom: 0;
+    height: 400px;
+    width:600px;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
