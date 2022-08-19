@@ -1,0 +1,24 @@
+.title {
+    margin-top: 36px;
+    text-align: center;
+}
+
+.formComponentContainer {
+    display: flex;
+    justify-content: center;
+    padding: 50px;
+}
+
+.forgotPassword {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
+}
+
+.submitButtonContainer {
+    text-align: right;
+}
+
+.submitButton {
+    width: 190px;
+}

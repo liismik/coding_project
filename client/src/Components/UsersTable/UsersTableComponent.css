@@ -1,0 +1,17 @@
+.usersTableContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.title {
+    display: flex;
+    justify-content: center;
+}
+
+.listContent {
+    text-align: center;
+}
+
+.listItem {
+    color: black;
+}
