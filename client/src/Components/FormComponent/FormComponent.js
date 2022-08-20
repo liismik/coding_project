@@ -21,11 +21,13 @@ function FormComponent(props) {
                 toast.success(response, {position: "top-center"});
                 if(title === 'Login' && response.data.auth){
                     localStorage.setItem("token", response.data.token);
+                    localStorage.setItem("email", values.email);
                     props.loggedInStatus(true);
                 }
                 navigate(navigateTo);
             })
             .catch((err) => {
+                console.log('error', err);
                 toast.error(err.response.data.message, {position: "top-center"});
             })
     }

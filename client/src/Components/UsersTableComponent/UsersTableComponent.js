@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {default as axios} from "axios";
 import {Button} from "antd";
 import "./UsersTableComponent.css";
@@ -9,6 +9,7 @@ import {toast} from "react-toastify";
 import PaginationComponent from "../PaginationComponent/PaginationComponent";
 
 function UsersTableComponent() {
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const resultsPerPage = 10;
@@ -36,7 +37,7 @@ function UsersTableComponent() {
         getPaginatedUsers({resultsPerPage, currentPageNumber, state: 'initial'}).then();
     }, []);
 
-    const handleClick = (userId) => {
+    const handleClick = (userId, userEmail) => {
         confirmAlert(
             {
                 title: "Confirm",
@@ -45,11 +46,20 @@ function UsersTableComponent() {
                     {
                         label: "Confirm deletion",
                         onClick: async () => {
-                            //TODO if id matches current user, route current user to register page after deletion
-                            await axios.post("/app/users/delete-user", {userId})
+                            console.log('gonna send request', userId, userEmail);
+                            await axios.post("/app/users/delete-user", {userId, userEmail}, {
+                                headers: {
+                                    "x-access-token": localStorage.getItem("token"),
+                                }})
                                 .then((response) => {
-                                    toast.success(response, {position: "top-center"});
-                                    getPaginatedUsers({resultsPerPage, currentPageNumber, state: 'initial'}).then();
+                                    if(response.data.deletedOwnAccount) {
+                                        localStorage.removeItem("token");
+                                        localStorage.removeItem("email");
+                                        navigate("/login");
+                                    } else {
+                                        toast.success(response, {position: "top-center"});
+                                        getPaginatedUsers({resultsPerPage, currentPageNumber, state: 'initial'}).then();
+                                    }
                                 })
                                 .catch((err) => {
                                     toast.error(err.response.data, {position: "top-center"});
@@ -99,7 +109,7 @@ function UsersTableComponent() {
                                     <td className="activityStatus">Inactive</td>
                                 ) : null
                                 }
-                                <td className="deleteButton" onClick={() => handleClick(user._id)}>Delete</td>
+                                <td className="deleteButton" onClick={() => handleClick(user._id, user.email)}>Delete</td>
                             </tr>
                         ))}
                     </tbody>

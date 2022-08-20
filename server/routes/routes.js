@@ -15,7 +15,7 @@ const verifyJWT = (req, res, next) => {
     if(!token) {
         res.send("No valid token found");
     } else {
-        jwt.verify(token, "jwtSuperMegaPrivateKey", (err, decoded) => {
+        jwt.verify(token, process.env.mySecretKey, (err, decoded) => {
             if (err) {
                 res.status(400).json({auth: false, message: "Authentication has failed"})
             } else {
@@ -24,12 +24,51 @@ const verifyJWT = (req, res, next) => {
             }
         })
     }
-
 }
 
-router.get('/isUserAuth', verifyJWT, (req, res) => {
-    res.send("You are authenticated!");
-})
+async function sendEmail(emailValues, fileName, email, subject) {
+    const source = fs.readFileSync(path.join(__dirname, "..", "emailTemplates", fileName), "utf8");
+    const template = Handlebars.compile(source);
+    const html = template(emailValues);
+
+    await client.sendEmail({
+        "From": "lmikola@tlu.ee",
+        "To": email,
+        "Subject": subject,
+        "HtmlBody": html,
+        "TextBody": "Hello from Postmark!",
+        "MessageStream": "outbound"
+    });
+}
+
+function paginate(resultsPerPage, currentPageNumber, paginatableData, state) {
+    let totalPages = 0;
+
+    const startingIndex = (currentPageNumber-1)*resultsPerPage;
+    const lastIndex = startingIndex+resultsPerPage;
+
+    let paginatedData;
+
+    if(paginatableData.length < lastIndex) {
+        paginatedData = paginatableData.slice(startingIndex, paginatableData.length);
+    } else {
+        paginatedData = paginatableData.slice(startingIndex, lastIndex);
+    }
+    let returnValues;
+
+    if (state === "initial") {
+        totalPages = Math.ceil(paginatableData.length/resultsPerPage);
+        returnValues = {
+            totalPages: totalPages,
+            paginatedData: paginatedData
+        }
+    } else {
+        returnValues = {
+            paginatedData: paginatedData
+        }
+    }
+    return (returnValues);
+}
 
 router.post("/register", async (req, res) => {
     const { email, password } = req.body;
@@ -39,30 +78,30 @@ router.post("/register", async (req, res) => {
     )
 
     if (accountExists)
-        return res.status(400).json("User already exists!");
+        return res.status(400).json({ message: "User already exists!" });
 
     const emailRegex = /^[-!#$%&'*+\/\d=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/\d=?A-Z^_a-z`{|}~])*@[a-zA-Z\d](-*\.?[a-zA-Z\d])*\.[a-zA-Z](-?[a-zA-Z\d])+$/;
 
     if (!email)
-        return res.status(400).json("Input is not an email!");
+        return res.status(400).json({ message: "Input is not an email!" });
 
     if (email.length > 254)
-        return res.status(400).json("Email is too long!");
+        return res.status(400).json({ message: "Email is too long!" });
 
     const valid = emailRegex.test(email)
     if (!valid)
-        return res.status(400).send("The email format is not correct!");
+        return res.status(400).json({ message: "The email format is not correct!" });
 
     const parts = email.split('@');
     if(parts[0].length>64)
-        return res.status(400).send("First half of email is too long!")
+        return res.status(400).json({ message: "First half of email is too long!" });
 
     const domainParts = parts[1].split(".");
     if(domainParts.some(function(part) { return part.length>63; }))
-        return res.status(400).send("Email domain length is too long!")
+        return res.status(400).json({ message: "Email domain length is too long!" });
 
     if(!password || (password.length < 8))
-        return res.status(400).send("Password is too short! Must be more 8 or more characters long.")
+        return res.status(400).json({ message: "Password is too short! Must be more 8 or more characters long." });
 
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -81,14 +120,13 @@ router.post("/register", async (req, res) => {
             res.json(error)
         })
 
-    //const emailValidationLink = "http://localhost:3000/confirm-account";
-    //const emailValues = { emailValidationLink:  emailValidationLink };
+    /*const emailValidationLink = "http://localhost:3000/confirm-account"; //TODO replace with accurate link after deployment
+    const emailValues = { emailValidationLink:  emailValidationLink };
 
-    /*try {
+    try {
         await sendEmail(emailValues, "registered.hbs", email, "Successful registration to the coding_project!");
-        console.log('success sending email!');
     } catch {
-        console.log('didnt send email for some reason');
+        res.status(200).json({ message: "Your account has been successfully registered, but no confirmation email was sent out. You can still verify your account at http://localhost:3000/confirm-account"}); //TODO replace link after deployment with correct link
     }*/
 
     return res.status(200);
@@ -102,14 +140,14 @@ router.post("/login", async (req, res) => {
     )
 
     if (!user)
-        return res.status(400).json("A user with that email does not exist!");
+        return res.status(400).json({ message:"A user with that email does not exist!" });
 
     try {
         if ((await bcrypt.compare(password, user.password)) && user.verified) {
             const timestamp = new Date().getTime();
 
             const userId = user._id;
-            const token = jwt.sign({userId}, "jwtSuperMegaPrivateKey", {
+            const token = jwt.sign({userId}, process.env.mySecretKey, {
                 expiresIn: 300,
             })
 
@@ -123,8 +161,8 @@ router.post("/login", async (req, res) => {
         } else {
             return res.status(400).json({ auth: false, message: "Login failed!" });
         }
-    } catch (error) {
-        res.status(400).json(`Something went wrong... ${error}`);
+    } catch {
+        res.status(400).json( { message: "Something went wrong..." });
     }
 })
 
@@ -136,18 +174,18 @@ router.post("/confirm-account", async (req, res) => {
     )
 
     if (!user)
-        return res.status(400).json("A user with that email does not exist!");
+        return res.status(400).json({ message: "A user with that email does not exist!" });
 
     try {
         if (await bcrypt.compare(password, user.password)) {
-            res.status(200).json("Account successfully confirmed!");
+            res.status(200).json({ message: "Account successfully confirmed!" });
 
             await User.updateOne({ "email": email }, { "verified": true });
         } else {
-            return res.status(400).json("Confirmation failed!");
+            return res.status(400).json({ message: "Confirmation failed!" });
         }
-    } catch (error) {
-        res.status(400).json(`Something went wrong... ${error}`);
+    } catch {
+        res.status(400).json({ message: "Something went wrong..." });
     }
 })
 
@@ -163,10 +201,10 @@ router.post("/forgot-password", async (req, res) => {
         {"password": hashedPassword}
     )
 
-    //const emailValues = { newPassword: newPassword };
-    //await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");
+    /*const emailValues = { newPassword: newPassword };
+    await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");*/
 
-    return res.status(200).json("Email containing new password successfully sent!")
+    return res.status(200).json({ message: "Email containing new password successfully sent!" });
 })
 
 router.post("/users/paginated", verifyJWT, async (req, res) => {
@@ -192,13 +230,18 @@ router.get("/users/:id", verifyJWT, async (req, res) => {
 router.post("/users/delete-user", verifyJWT, async (req, res) => {
     try {
         const user = await User.findById(req.body.userId);
+        const email = req.body.userEmail;
 
-        //await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");
+        /*await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");*/
 
         await User.deleteOne({_id: req.body.userId});
-        return res.status(200).json("User successfully deleted!")
+
+        if(user.email === email) {
+            return res.status(200).json({ deletedOwnAccount: true, message: "User successfully deleted!" });
+        }
+        return res.status(200).json({ message: "User successfully deleted!" });
     } catch {
-        return res.status(400).json("Error while deleting user!");
+        return res.status(400).json({ message: "Error while deleting user!" });
     }
 
 })
@@ -212,49 +255,5 @@ router.post("/users/:id/history/paginated", verifyJWT, async (req, res) => {
 
     res.json(returnedValues);
 })
-
-async function sendEmail(emailValues, fileName, email, subject) {
-    const source = fs.readFileSync(path.join(__dirname, "..", "emailTemplates", fileName), "utf8");
-    const template = Handlebars.compile(source);
-    const html = template(emailValues);
-
-    await client.sendEmail({
-        "From": "lmikola@tlu.ee",
-        "To": email,
-        "Subject": subject,
-        "HtmlBody": html,
-        "TextBody": "Hello from Postmark!",
-        "MessageStream": "outbound"
-    });
-}
-
-function paginate(resultsPerPage, currentPageNumber, paginatableData, state) {
-    let totalPages = 0;
-
-    const startingIndex = (currentPageNumber-1)*resultsPerPage;
-    const lastIndex = startingIndex+resultsPerPage;
-
-    let paginatedData = [];
-
-    if(paginatableData.length-1 < lastIndex) {
-        paginatedData = paginatableData.slice(startingIndex, paginatableData.length-1);
-    } else {
-        paginatedData = paginatableData.slice(startingIndex, lastIndex);
-    }
-    let returnValues = null;
-
-    if (state === "initial") {
-        totalPages = Math.ceil(paginatableData.length/resultsPerPage);
-        returnValues = {
-            totalPages: totalPages,
-            paginatedData: paginatedData
-        }
-    } else {
-        returnValues = {
-            paginatedData: paginatedData
-        }
-    }
-    return (returnValues);
-}
 
 module.exports = router
