@@ -17,7 +17,12 @@ function UsersLoginHistoryComponent() {
     };
 
     async function getPaginatedHistory(params) {
-        await axios.post(`/app/users/${id}/history/paginated`, { params })
+        await axios.post(`/app/users/${id}/history/paginated`, { params },
+            {
+                headers: {
+                    "x-access-token": localStorage.getItem("token"),
+                }
+            })
             .then((response) => {
                 setHistory(response.data.paginatedData);
                 if(response.data.totalPages){

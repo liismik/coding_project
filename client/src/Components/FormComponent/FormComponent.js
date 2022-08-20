@@ -13,7 +13,10 @@ function FormComponent(props) {
     const { title, buttonText, forgotPWLink } = props;
 
     async function userAction(api, values, navigateTo){
-        await axios.post(api, values)
+        await axios.post(api, values, {
+            headers: {
+                "x-access-token": localStorage.getItem("token"),
+            }})
             .then((response) => {
                 toast.success(response, {position: "top-center"});
                 if(title === 'Login' && response.data.auth){

@@ -20,7 +20,10 @@ function UsersTableComponent() {
     };
 
     async function getPaginatedUsers(params) {
-        await axios.post("/app/users/paginated", { params })
+        await axios.post("/app/users/paginated", { params }, {
+            headers: {
+                "x-access-token": localStorage.getItem("token"),
+            }})
             .then((response) => {
                 setUsers(response.data.paginatedData);
                 if(response.data.totalPages){
