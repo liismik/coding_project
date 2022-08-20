@@ -1,0 +1,12 @@
+.componentContainer {
+    text-align: center;
+    display: block;
+    width: fit-content;
+    margin: auto;
+    padding: 120px;
+}
+
+.gif {
+    height: 500px;
+    width: 700px;
+}

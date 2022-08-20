@@ -1,10 +1,10 @@
 import React from "react";
-import { Link, useNavigate } from 'react-router-dom';
-import { Button, Form, Input } from 'antd';
-import './FormComponent.css';
-import {toast, ToastContainer} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import {default as axios} from 'axios';
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Form, Input } from "antd";
+import "./FormComponent.css";
+import {toast} from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {default as axios} from "axios";
 
 toast.configure();
 
@@ -15,52 +15,53 @@ function FormComponent(props) {
     async function userAction(api, values, navigateTo){
         await axios.post(api, values)
             .then((response) => {
-                toast.success(response, {position: 'top-center'});
+                toast.success(response, {position: "top-center"});
                 navigate(navigateTo);
             })
             .catch((err) => {
-                toast.error(err.response.data, {position: 'top-center'});
+                toast.error(err.response.data, {position: "top-center"});
             })
     }
 
     const onFinish = async (values: any) => {
         switch (title) {
-            case 'Login':
-                await userAction('/app/login', values, '/users');
+            case "Login":
+                await userAction("/app/login", values, "/users");
                 return
-            case 'Register':
-                await userAction('/app/register', values, '/login');
+            case "Register":
+                await userAction("/app/register", values, "/login");
                 return
-            case 'Forgot password':
+            case "Forgot password":
                 await userAction('/app/forgot-password', values, '/login');
                 return
-            case 'Confirm account':
-                await userAction('/app/confirm-account', values, '/login');
+            case "Confirm account":
+                await userAction("/app/confirm-account", values, "/login");
                 return
+            case "Add another user":
+                await userAction("/app/register", values, "/users");
         }
     }
 
-    const onFinishFailed = (errorInfo: any) => {
-        toast.error('Something went wrong...');
-        console.log(errorInfo);
+    const onFinishFailed = () => {
+        toast.error("Something went wrong...");
     }
 
     return (
         <div>
-            {((title !== 'Register') && (title !== 'Forgot password'))
+            {((title !== "Register") && (title !== "Forgot password"))
                 ? (
-                    <Button type='primary'>
-                        <Link to='/register'>Register</Link>
+                    <Button type="primary">
+                        <Link to="/register">Register</Link>
                     </Button>
-                ) : ((title !== 'Login') && (title !== 'Confirm account')) ? (
-                    <Button type='primary'>
-                        <Link to='/login'>Login</Link>
+                ) : ((title !== "Login") && (title !== "Confirm account")) ? (
+                    <Button type="primary">
+                        <Link to="/login">Login</Link>
                     </Button>
                 )
                 : null
             }
-            <h1 className='title'>{title}</h1>
-            <div className='formComponentContainer'>
+            <h1 className="title">{title}</h1>
+            <div className="formContainer">
                 <Form
                     name="basic"
                     labelCol={{ span: 8 }}
@@ -72,7 +73,7 @@ function FormComponent(props) {
                     <Form.Item
                         label="Email"
                         name="email"
-                        rules={[{ required: true, message: 'Please input your email!' }]}
+                        rules={[{ required: true, message: "Please input your email!" }]}
                     >
                         <Input />
                     </Form.Item>
@@ -81,16 +82,16 @@ function FormComponent(props) {
                             <Form.Item
                                 label="Password"
                                 name="password"
-                                rules={[{required: true, message: 'Please input your password!'}]}
+                                rules={[{required: true, message: "Please input your password!"}]}
                             >
                                 <Input.Password/>
                             </Form.Item>
                         )
                         : null
                     }
-                    {((title === 'Login'))
+                    {((title === "Login"))
                         ? (
-                            <Link to='/forgot-password' className='forgotPassword'>Forgot password</Link>
+                            <Link to="/forgot-password" className="forgotPassword">Forgot password</Link>
                         )
                         : null
                     }

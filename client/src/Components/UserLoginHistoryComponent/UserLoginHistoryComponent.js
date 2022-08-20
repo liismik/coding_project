@@ -1,31 +1,25 @@
 import React, {useEffect, useState} from "react";
 import {default as axios} from "axios";
 import {Link, useParams} from "react-router-dom";
-import './UserLoginHistoryComponent.css';
+import "./UserLoginHistoryComponent.css";
 import {Button} from "antd";
+import PaginationComponent from "../PaginationComponent/PaginationComponent";
 
-function UsersTableComponent() {
+function UsersLoginHistoryComponent() {
     const { id } = useParams();
     const [history, setHistory] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
-    const [currentPageNumber, setCurrentPageNumber] = useState(1);
     const resultsPerPage = 10;
+    let currentPageNumber = 1;
 
-    const handlePageChange = async (changeToPage) => {
-        if ((changeToPage === 'previous') && (currentPageNumber > 1)) {
-            setCurrentPageNumber(currentPageNumber-1);
-            await getPaginatedHistory({resultsPerPage, currentPageNumber: currentPageNumber-1});
-        }
-        if ((changeToPage === 'next') && (currentPageNumber < totalPages)) {
-            setCurrentPageNumber(currentPageNumber+1);
-            await getPaginatedHistory({resultsPerPage, currentPageNumber: currentPageNumber+1});
-        }
-    }
+    const changeHistoryPage = async (params) => {
+        await getPaginatedHistory(params);
+    };
 
     async function getPaginatedHistory(params) {
         await axios.post(`/app/users/${id}/history/paginated`, { params })
             .then((response) => {
-                setHistory(response.data.history);
+                setHistory(response.data.paginatedData);
                 if(response.data.totalPages){
                     setTotalPages(response.data.totalPages);
                 }
@@ -33,19 +27,19 @@ function UsersTableComponent() {
     }
 
     useEffect( () => {
-        getPaginatedHistory({resultsPerPage, currentPageNumber, state: 'initial'}).then();
+        getPaginatedHistory({resultsPerPage, currentPageNumber, state: "initial"}).then();
     }, []);
 
     return (
         <div>
-            <Button type='primary'>
-                <Link to='/register'>Register new user</Link>
+            <Button type="primary">
+                <Link to="/register">Register new user</Link>
             </Button>
-            <Button type='primary'>
-                <Link to='/users'>Users list</Link>
+            <Button type="primary">
+                <Link to="/users">Users list</Link>
             </Button>
-            <h2 className='title'>Selected user's login history</h2>
-            <div className='historyTable'>
+            <h2 className="title">Selected user's login history</h2>
+            <div className="historyTable">
                 <table>
                     <tbody>
                         <tr>
@@ -56,18 +50,17 @@ function UsersTableComponent() {
                                 <td key={i}>{new Date(loginOccurrence).toUTCString()}</td>
                             </tr>
                         ))
-
                         }
                     </tbody>
                 </table>
             </div>
-            <div className='paginationButtonsContainer'>
-                <button onClick={() => handlePageChange('previous')}>{'<'}</button>
-                <span>{currentPageNumber}</span>
-                <button onClick={() => handlePageChange('next')}>{'>'}</button>
-            </div>
+            <PaginationComponent
+                resultsPerPage={resultsPerPage}
+                totalPages={totalPages}
+                changePage={changeHistoryPage}
+            />
         </div>
     )
 }
 
-export default UsersTableComponent
+export default UsersLoginHistoryComponent

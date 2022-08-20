@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 
 const registerTemplate = new mongoose.Schema({
     email: {
@@ -18,4 +18,4 @@ const registerTemplate = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('coding_project', registerTemplate)
+module.exports = mongoose.model("coding_project", registerTemplate)
