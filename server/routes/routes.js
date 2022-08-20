@@ -2,12 +2,34 @@ const express = require("express")
 const router = express.Router()
 const User = require("../models/User")
 const bcrypt = require("bcrypt")
-//const jwt = require('jsonwebtoken')
 const postmark = require("postmark")
 const fs = require("fs")
 const path = require("path")
 const Handlebars = require("handlebars")
 const client = new postmark.ServerClient("fd6205c9-41c4-41ae-b4d7-8245db00d1d8")
+const jwt = require("jsonwebtoken")
+
+const verifyJWT = (req, res, next) => {
+    const token = req.headers["x-access-token"];
+
+    if(!token) {
+        res.send("No valid token found");
+    } else {
+        jwt.verify(token, "jwtSuperMegaPrivateKey", (err, decoded) => {
+            if (err) {
+                res.status(400).json({auth: false, message: "Authentication has failed"})
+            } else {
+                req.userId = decoded.id;
+                next();
+            }
+        })
+    }
+
+}
+
+router.get('/isUserAuth', verifyJWT, (req, res) => {
+    res.send("You are authenticated!");
+})
 
 router.post("/register", async (req, res) => {
     const { email, password } = req.body;
@@ -86,13 +108,20 @@ router.post("/login", async (req, res) => {
         if ((await bcrypt.compare(password, user.password)) && user.verified) {
             const timestamp = new Date().getTime();
 
-            res.status(200).json("Successfully logged in!");
+            const userId = user._id;
+            const token = jwt.sign({userId}, "jwtSuperMegaPrivateKey", {
+                expiresIn: 300,
+            })
+
+
 
             await User.updateOne({ "email": email }, { $push: { "loginHistory": timestamp } })
+
+            res.status(200).json({ auth: true, token: token, message: "Successfully logged in!" })
         } else if (!user.verified) {
-            return res.status(400).json("Please check your email and verify your account first!");
+            return res.status(400).json({ auth: false, message: "Please check your email and verify your account first!" });
         } else {
-            return res.status(400).json("Login failed!");
+            return res.status(400).json({ auth: false, message: "Login failed!" });
         }
     } catch (error) {
         res.status(400).json(`Something went wrong... ${error}`);
@@ -140,7 +169,7 @@ router.post("/forgot-password", async (req, res) => {
     return res.status(200).json("Email containing new password successfully sent!")
 })
 
-router.post("/users/paginated", async (req, res) => {
+router.post("/users/paginated", verifyJWT, async (req, res) => {
     const { resultsPerPage, currentPageNumber, state } = req.body.params;
 
     const users = await User.find({}, { "email": 1, "verified": 1 });
@@ -149,7 +178,7 @@ router.post("/users/paginated", async (req, res) => {
     res.json(returnedValues);
 })
 
-router.get("/users/:id", async (req, res) => {
+router.get("/users/:id", verifyJWT, async (req, res) => {
     const user = await User.findById(req.params.id);
 
     let readableDateTimes = [];
@@ -160,7 +189,7 @@ router.get("/users/:id", async (req, res) => {
     res.json(readableDateTimes);
 })
 
-router.post("/users/delete-user", async (req, res) => {
+router.post("/users/delete-user", verifyJWT, async (req, res) => {
     try {
         const user = await User.findById(req.body.userId);
 
@@ -174,7 +203,7 @@ router.post("/users/delete-user", async (req, res) => {
 
 })
 
-router.post("/users/:id/history/paginated", async (req, res) => {
+router.post("/users/:id/history/paginated", verifyJWT, async (req, res) => {
     const user = await User.findById(req.params.id);
     const loginHistory = user.loginHistory.reverse();
     const { resultsPerPage, currentPageNumber, state } = req.body.params;

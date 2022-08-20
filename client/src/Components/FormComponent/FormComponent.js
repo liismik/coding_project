@@ -16,10 +16,14 @@ function FormComponent(props) {
         await axios.post(api, values)
             .then((response) => {
                 toast.success(response, {position: "top-center"});
+                if(title === 'Login' && response.data.auth){
+                    localStorage.setItem("token", response.data.token);
+                    props.loggedInStatus(true);
+                }
                 navigate(navigateTo);
             })
             .catch((err) => {
-                toast.error(err.response.data, {position: "top-center"});
+                toast.error(err.response.data.message, {position: "top-center"});
             })
     }
 

@@ -30,7 +30,6 @@ function UsersTableComponent() {
     }
 
     useEffect( () => {
-        console.log('ees', resultsPerPage, currentPageNumber);
         getPaginatedUsers({resultsPerPage, currentPageNumber, state: 'initial'}).then();
     }, []);
 
@@ -46,12 +45,10 @@ function UsersTableComponent() {
                             //TODO if id matches current user, route current user to register page after deletion
                             await axios.post("/app/users/delete-user", {userId})
                                 .then((response) => {
-                                    console.log("Front success", response);
                                     toast.success(response, {position: "top-center"});
                                     getPaginatedUsers({resultsPerPage, currentPageNumber, state: 'initial'}).then();
                                 })
                                 .catch((err) => {
-                                    console.log("Front fail", err.response.data);
                                     toast.error(err.response.data, {position: "top-center"});
                                 })
                         }

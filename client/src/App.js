@@ -1,14 +1,35 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import FormComponent from "./Components/FormComponent/FormComponent";
 import UsersTableComponent from "./Components/UsersTableComponent/UsersTableComponent";
 import UserLoginHistoryComponent from "./Components/UserLoginHistoryComponent/UserLoginHistoryComponent";
 import AccessDeniedComponent from "./Components/AccessDeniedComponent/AccessDeniedComponent"
+import axios from 'axios'
 
 function App() {
+    const [loginStatus, setLoginStatus] = useState(false);
+
+    const changeLoggedInStatus = async (currentState) => {
+        await setLoginStatus(currentState)
+    }
+
+    const userAuthenticated = async () => {
+        await axios.get('/app/isUserAuth', {
+            headers: {
+                "x-access-token": localStorage.getItem("token"),
+            }
+        }).then((response) => {
+            console.log(response);
+        })
+    }
+
+    useEffect( () => {
+        console.log('loginstatus', loginStatus);
+    }, [loginStatus]);
+
     return (
-        <>
+        <div>
             <BrowserRouter>
                 <Routes>
                     <Route
@@ -25,15 +46,16 @@ function App() {
                             title={"Login"}
                             buttonText={"Log in"}
                             forgotPWLink={false}
+                            loggedInStatus={changeLoggedInStatus}
                         />}
                     />
                     <Route
                         path="/users"
-                        element={<UsersTableComponent />}
+                        element={loginStatus ? <UsersTableComponent /> : <AccessDeniedComponent />}
                     />
                     <Route
                         path="/users/:id"
-                        element={<UserLoginHistoryComponent />}
+                        element={loginStatus ? <UserLoginHistoryComponent /> : <AccessDeniedComponent />}
                     />
                     <Route
                         path="/register"
@@ -45,11 +67,12 @@ function App() {
                     />
                     <Route
                         path="/add-another-user"
-                        element={<FormComponent
+                        element={loginStatus ?
+                        <FormComponent
                             title={"Add another user"}
                             buttonText={"Submit"}
                             forgotPWLink={false}
-                        />}
+                        /> : <AccessDeniedComponent />}
                     >
                     </Route>
                     <Route
@@ -74,7 +97,7 @@ function App() {
                     />
                 </Routes>
             </BrowserRouter>
-        </>
+        </div>
     )
 }
 
