@@ -115,8 +115,6 @@ router.post('/login', async (req, res) => {
             res.status(200).json('Successfully logged in!');
 
             await User.updateOne({ 'email': email }, { $push: { 'loginHistory': timestamp } })
-
-            return
         } else if (!user.verified) {
             return res.status(400).json('Please check your email and verify your account first!');
         } else {
@@ -142,8 +140,6 @@ router.post('/confirm-account', async (req, res) => {
             res.status(200).json('Account successfully confirmed!');
 
             await User.updateOne({ 'email': email }, { 'verified': true });
-
-            return
         } else {
             console.log('Confirmation failed');
             return res.status(400).json('Confirmation failed!');
@@ -177,6 +173,38 @@ router.post('/users/delete-user', async (req, res) => {
         return res.status(400).json('Error while deleting user!');
     }
 
+})
+
+router.post('/users/:id/history/paginated', async (req, res) => {
+    const user = await User.findById(req.params.id);
+    const { resultsPerPage, currentPageNumber } = req.body.params;
+    let totalPages = 0;
+
+    const startingIndex = (currentPageNumber-1)*resultsPerPage;
+    const lastIndex = startingIndex+resultsPerPage;
+    const loginHistory = user.loginHistory.reverse();
+
+    let history = [];
+
+    if(loginHistory.length-1 < lastIndex) {
+        history = loginHistory.slice(startingIndex, loginHistory.length-1);
+    } else {
+        history = loginHistory.slice(startingIndex, lastIndex);
+    }
+    let returnValues = null;
+
+    if (req.body.params.state === 'initial') {
+        totalPages = Math.ceil(loginHistory.length/resultsPerPage);
+        returnValues = {
+            totalPages: totalPages,
+            history: history
+        }
+    } else {
+        returnValues = {
+            history: history
+        }
+    }
+    res.json(returnValues);
 })
 
 module.exports = router

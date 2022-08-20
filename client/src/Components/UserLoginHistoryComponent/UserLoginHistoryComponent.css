@@ -3,6 +3,17 @@
     justify-content: center;
 }
 
+.historyTable {
+    display: flex;
+    justify-content: center;
+}
+
 .listContainer {
     text-align: center;
+}
+
+.paginationButtonsContainer {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
 }

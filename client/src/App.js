@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import FormComponent from "./Components/FormComponent/FormComponent";
-import UsersTableComponent from './Components/UsersTable/UsersTableComponent';
+import UsersTableComponent from './Components/UsersTableComponent/UsersTableComponent';
 import UserLoginHistoryComponent from './Components/UserLoginHistoryComponent/UserLoginHistoryComponent';
 
 

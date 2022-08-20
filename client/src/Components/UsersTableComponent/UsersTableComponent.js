@@ -9,6 +9,7 @@ import {toast} from "react-toastify";
 
 function UsersTableComponent() {
     const [users, setUsers] = useState([]);
+    const tableHeaders = ['Email', 'Activity status', 'Delete user'];
 
     useEffect( () => {
         getAllUsers().then();
@@ -32,7 +33,7 @@ function UsersTableComponent() {
                             await axios.post('/app/users/delete-user', {userId})
                                 .then((response) => {
                                     console.log('Front success', response);
-                                    //toast.success(response, {position: 'top-center'});
+                                    toast.success(response, {position: 'top-center'});
                                     getAllUsers().then();
                                 })
                                 .catch((err) => {
@@ -63,31 +64,33 @@ function UsersTableComponent() {
                 <Link to='/register'>Register new user</Link>
             </Button>
             <h1 className='title'>Existing users</h1>
-            <table className='usersTable'>
-                <tbody>
-                    <tr>
-                        <th>Email</th>
-                        <th>Activity status</th>
-                        <th>Delete user</th>
-                    </tr>
-                    {users.map((user, i) => (
-                        <tr key={i}>
-                            <td>
-                                <Link to={`/users/${user._id}`} className='listItem'>
-                                    {user.email}
-                                </Link>
-                            </td>
-                            {(user.verified) ? (
-                                <td className='activityStatus'>Active</td>
-                            ) : (!user.verified) ? (
-                                <td className='activityStatus'>Inactive</td>
-                            ) : null
-                            }
-                            <td className='deleteButton' onClick={() => handleClick(user._id)}>Delete</td>
+            <div className='usersTable'>
+                <table>
+                    <tbody>
+                        <tr>
+                            {tableHeaders.map((header, i) => (
+                                <th key={i}>{header}</th>
+                            ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                        {users.map((user, i) => (
+                            <tr key={i}>
+                                <td>
+                                    <Link to={`/users/${user._id}`} className='listItem'>
+                                        {user.email}
+                                    </Link>
+                                </td>
+                                {(user.verified) ? (
+                                    <td className='activityStatus'>Active</td>
+                                ) : (!user.verified) ? (
+                                    <td className='activityStatus'>Inactive</td>
+                                ) : null
+                                }
+                                <td className='deleteButton' onClick={() => handleClick(user._id)}>Delete</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </>
     )
 }
