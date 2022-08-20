@@ -3,10 +3,11 @@ const router = express.Router()
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
 //const jwt = require('jsonwebtoken')
-//const postmark = require('postmark')
-//const fs = require('fs')
-//const path = require('path')
-//const Handlebars = require('handlebars')
+const postmark = require('postmark')
+const fs = require('fs')
+const path = require('path')
+const Handlebars = require('handlebars')
+const client = new postmark.ServerClient("fd6205c9-41c4-41ae-b4d7-8245db00d1d8")
 
 /*const verify = (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -75,26 +76,18 @@ router.post('/register', async (req, res) => {
         .catch(error => {
             res.json(error)
         })
-/*
-    const client = new postmark.ServerClient("fd6205c9-41c4-41ae-b4d7-8245db00d1d8");
 
     const emailValidationLink = 'http://localhost:3000/confirm-account';
     const emailValues = { emailValidationLink:  emailValidationLink };
 
-    const source = fs.readFileSync(path.join(__dirname, '..', 'emailTemplates', 'registered.hbs'), 'utf8');
-    const template = Handlebars.compile(source);
-    const html = template(emailValues);
+    console.log('email valued', emailValues);
+    /*try {
+        await sendEmail(emailValues, "registered.hbs", email, "Successful registration to the coding_project!");
+        console.log('success sending email!');
+    } catch {
+        console.log('didnt send email for some reason');
+    }*/
 
-    await client.sendEmail({
-        "From": "lmikola@tlu.ee",
-        "To": email,
-        "Subject": "Hello from Postmark",
-        "HtmlBody": html,
-        "TextBody": "Hello from Postmark!",
-        "MessageStream": "outbound"
-    });
-
-    console.log("email sent");*/
     return res.status(200);
 })
 
@@ -148,6 +141,40 @@ router.post('/confirm-account', async (req, res) => {
         res.status(400).json(`Something went wrong... ${error}`);
     }
 })
+
+router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    const newPassword = Math.random().toString(36).slice(-12);
+    console.log(newPassword);
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    await User.findOneAndUpdate(
+        {'email': email},
+        {'password': hashedPassword}
+    )
+
+    //const emailValues = { newPassword: newPassword };
+    //await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");
+
+    return res.status(200).json('Email containing new password successfully sent!')
+})
+
+async function sendEmail(emailValues, fileName, email, subject) {
+    const source = fs.readFileSync(path.join(__dirname, '..', 'emailTemplates', fileName), 'utf8');
+    const template = Handlebars.compile(source);
+    const html = template(emailValues);
+
+    await client.sendEmail({
+        "From": "lmikola@tlu.ee",
+        "To": email,
+        "Subject": subject,
+        "HtmlBody": html,
+        "TextBody": "Hello from Postmark!",
+        "MessageStream": "outbound"
+    });
+}
 
 router.get('/users', async (req, res) => {
     const users = await User.find({}, { 'email': 1, 'verified': 1 });
