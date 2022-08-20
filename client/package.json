@@ -10,10 +10,13 @@
     "antd": "^4.22.6",
     "assert": "^2.0.0",
     "axios": "^0.27.2",
+    "concurrently": "^7.3.0",
     "react": "^18.2.0",
+    "react-confirm-alert": "^3.0.6",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
+    "react-toastify": "^8.2.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
