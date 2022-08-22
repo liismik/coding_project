@@ -120,14 +120,14 @@ router.post("/register", async (req, res) => {
             res.json(error)
         })
 
-    const emailValidationLink = "http://localhost:3000/confirm-account"; //TODO replace with accurate link after deployment
+    /*const emailValidationLink = "http://localhost:3000/confirm-account"; //TODO replace with accurate link after deployment
     const emailValues = { emailValidationLink:  emailValidationLink };
 
     try {
         await sendEmail(emailValues, "registered.hbs", email, "Successful registration to the coding_project!");
     } catch {
         res.status(200).json({ message: "Your account has been successfully registered, but no confirmation email was sent out. You can still verify your account at http://localhost:3000/confirm-account"}); //TODO replace link after deployment with correct link
-    }
+    }*/
 
     return res.status(200);
 })
@@ -190,6 +190,13 @@ router.post("/confirm-account", async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
 
+    const user = await User.findOne(
+        { "email": email }
+    )
+
+    if (!user)
+        return res.status(400).json({ message: "A user with that email does not exist!" });
+
     const newPassword = Math.random().toString(36).slice(-12);
 
     const hashedPassword = await bcrypt.hash(newPassword, 10)
@@ -199,8 +206,8 @@ router.post("/forgot-password", async (req, res) => {
         {"password": hashedPassword}
     )
 
-    const emailValues = { newPassword: newPassword };
-    await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");
+    /*const emailValues = { newPassword: newPassword };
+    await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");*/
 
     return res.status(200).json({ message: "Email containing new password successfully sent!" });
 })
@@ -214,25 +221,14 @@ router.post("/users/paginated", verifyJWT, async (req, res) => {
     res.json(returnedValues);
 })
 
-router.get("/users/:id", verifyJWT, async (req, res) => {
-    const user = await User.findById(req.params.id);
-
-    let readableDateTimes = [];
-    user.loginHistory.forEach((timestamp) => {
-        readableDateTimes.push(new Date(timestamp).toString());
-    })
-
-    res.json(readableDateTimes);
-})
-
 router.post("/users/delete-user", verifyJWT, async (req, res) => {
     try {
         const user = await User.findById(req.body.userId);
         const email = req.body.currentUserEmail;
 
-        await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");*/
-
         await User.deleteOne({_id: req.body.userId});
+
+        /*await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");*/
 
         if(user.email === email) {
             return res.status(200).json({ deletedOwnAccount: true, message: "User successfully deleted!" });
