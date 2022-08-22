@@ -120,14 +120,14 @@ router.post("/register", async (req, res) => {
             res.json(error)
         })
 
-    /*const emailValidationLink = "http://localhost:3000/confirm-account"; //TODO replace with accurate link after deployment
+    const emailValidationLink = "http://localhost:3000/confirm-account"; //TODO replace with accurate link after deployment
     const emailValues = { emailValidationLink:  emailValidationLink };
 
     try {
         await sendEmail(emailValues, "registered.hbs", email, "Successful registration to the coding_project!");
     } catch {
         res.status(200).json({ message: "Your account has been successfully registered, but no confirmation email was sent out. You can still verify your account at http://localhost:3000/confirm-account"}); //TODO replace link after deployment with correct link
-    }*/
+    }
 
     return res.status(200);
 })
@@ -199,8 +199,8 @@ router.post("/forgot-password", async (req, res) => {
         {"password": hashedPassword}
     )
 
-    /*const emailValues = { newPassword: newPassword };
-    await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");*/
+    const emailValues = { newPassword: newPassword };
+    await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");
 
     return res.status(200).json({ message: "Email containing new password successfully sent!" });
 })
@@ -230,7 +230,7 @@ router.post("/users/delete-user", verifyJWT, async (req, res) => {
         const user = await User.findById(req.body.userId);
         const email = req.body.currentUserEmail;
 
-        /*await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");*/
+        await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");*/
 
         await User.deleteOne({_id: req.body.userId});
 
