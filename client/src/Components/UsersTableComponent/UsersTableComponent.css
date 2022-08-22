@@ -28,13 +28,25 @@
 }
 
 td, th {
-    border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
 }
 
+td {
+    border: 1px solid #57737A;
+}
+
+th {
+    background-color: #57737A;
+    border: 1px solid #040F0F;
+}
+
 tr:nth-child(even) {
-    background-color: #dddddd;
+    background-color: #C2FCF7;
+}
+
+table {
+    background-color: #85BDBF;
 }
 
 .confirmationModal {

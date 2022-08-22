@@ -148,10 +148,8 @@ router.post("/login", async (req, res) => {
 
             const userId = user._id;
             const token = jwt.sign({userId}, process.env.mySecretKey, {
-                expiresIn: 300,
+                expiresIn: 3000,
             })
-
-
 
             await User.updateOne({ "email": email }, { $push: { "loginHistory": timestamp } })
 
@@ -210,7 +208,7 @@ router.post("/forgot-password", async (req, res) => {
 router.post("/users/paginated", verifyJWT, async (req, res) => {
     const { resultsPerPage, currentPageNumber, state } = req.body.params;
 
-    const users = await User.find({}, { "email": 1, "verified": 1 });
+    const users = (await User.find({}, { "email": 1, "verified": 1 })).reverse();
 
     const returnedValues = paginate(resultsPerPage, currentPageNumber, users, state);
     res.json(returnedValues);
@@ -230,7 +228,7 @@ router.get("/users/:id", verifyJWT, async (req, res) => {
 router.post("/users/delete-user", verifyJWT, async (req, res) => {
     try {
         const user = await User.findById(req.body.userId);
-        const email = req.body.userEmail;
+        const email = req.body.currentUserEmail;
 
         /*await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");*/
 

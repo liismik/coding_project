@@ -1,24 +1,27 @@
-.title {
-    margin-top: 36px;
-    text-align: center;
+button {
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 .formContainer {
     display: flex;
     justify-content: center;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
     padding: 50px;
 }
 
 .forgotPassword {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 24px;
+    color: #C9FBFF;
+    font-weight: bold;
+    text-decoration: underline;
 }
 
 .submitButtonContainer {
-    text-align: right;
-}
-
-.submitButton {
-    width: 190px;
+    text-align: center;
 }

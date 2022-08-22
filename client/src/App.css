@@ -1,14 +1,50 @@
 @import '~antd/dist/antd.css';
-
 .title {
+    color: white;
     text-align: center;
-    padding: 40px 0;
+    padding: 46px 0;
 }
 
-.button {
-    margin: 0 12px;
+.title, .text, p, span, button, label {
+    font-family: "Trebuchet MS";
+    color: white;
+}
+
+.linkedButton {
+    font-family: "Trebuchet MS";
+    color: #C2FCF7;
+}
+
+.linkedButton:hover {
+    color: white;
+}
+
+label {
+    color: white;
+}
+
+input {
+    margin: 6px 0 14px 0;
+    padding: 4px 6px;
+    border-radius: 8px;
+    width: 220px;
+}
+
+button:not(.Toastify__close-button) {
+    cursor: pointer;
+    min-width: 100px;
+    margin: 30px 20px;
+    padding: 4px 16px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #57737A;
+}
+
+button:hover:not(.Toastify__close-button) {
+    background-color: #85BDBF;
 }
 
 body {
-    background-color: #E2E8DD;
+    background-color: #040F0F;
 }

@@ -9,8 +9,7 @@ import AccessDeniedComponent from "./Components/AccessDeniedComponent/AccessDeni
 function App() {
     const [loginStatus, setLoginStatus] = useState(false);
 
-    const changeLoggedInStatus = async (currentState) => {
-        console.log('parentis');
+    async function changeLoggedInStatus (currentState) {
         await setLoginStatus(currentState)
     }
 
@@ -18,7 +17,7 @@ function App() {
     }, [loginStatus]);
 
     return (
-        <div>
+        <>
             <BrowserRouter>
                 <Routes>
                     <Route
@@ -87,7 +86,7 @@ function App() {
                     />
                 </Routes>
             </BrowserRouter>
-        </div>
+        </>
     )
 }
 

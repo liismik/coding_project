@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {default as axios} from "axios";
 import {Link, useParams} from "react-router-dom";
 import "./UserLoginHistoryComponent.css";
-import {Button} from "antd";
 import PaginationComponent from "../PaginationComponent/PaginationComponent";
 
 function UsersLoginHistoryComponent() {
@@ -37,12 +36,12 @@ function UsersLoginHistoryComponent() {
 
     return (
         <div>
-            <Button type="primary">
+            <button>
                 <Link to="/register">Register new user</Link>
-            </Button>
-            <Button type="primary">
+            </button>
+            <button>
                 <Link to="/users">Users list</Link>
-            </Button>
+            </button>
             <h2 className="title">Selected user's login history</h2>
             <div className="historyTable">
                 <table>
