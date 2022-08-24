@@ -36,12 +36,12 @@ function UsersLoginHistoryComponent() {
 
     return (
         <div>
-            <button>
-                <Link to="/register">Register new user</Link>
-            </button>
-            <button>
-                <Link to="/users">Users list</Link>
-            </button>
+            <Link to="/register">
+                <button>Register new user</button>
+            </Link>
+            <Link to="/users">
+                <button>Users list</button>
+            </Link>
             <h2 className="title">Selected user's login history</h2>
             <div className="historyTable">
                 <table>
@@ -49,11 +49,15 @@ function UsersLoginHistoryComponent() {
                         <tr>
                             <th>Login times</th>
                         </tr>
-                        {history.map((loginOccurrence, i) => (
-                            <tr>
-                                <td key={i}>{new Date(loginOccurrence).toUTCString()}</td>
+                        {(history.length > 0) ? (history.map((loginOccurrence, i) => (
+                            <tr key={i}>
+                                <td>{new Date(loginOccurrence).toUTCString()}</td>
                             </tr>
-                        ))
+                        )))
+                            :
+                            <tr>
+                                <td>No login history</td>
+                            </tr>
                         }
                     </tbody>
                 </table>

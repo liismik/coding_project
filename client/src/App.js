@@ -1,20 +1,17 @@
 import React, {useState, useEffect} from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {BrowserRouter, Routes, Route} from "react-router-dom";
 import FormComponent from "./Components/FormComponent/FormComponent";
 import UsersTableComponent from "./Components/UsersTableComponent/UsersTableComponent";
 import UserLoginHistoryComponent from "./Components/UserLoginHistoryComponent/UserLoginHistoryComponent";
-import AccessDeniedComponent from "./Components/AccessDeniedComponent/AccessDeniedComponent"
+import AccessDeniedComponent from "./Components/AccessDeniedComponent/AccessDeniedComponent";
 
-function App() {
+function App({ t }) {
     const [loginStatus, setLoginStatus] = useState(false);
 
-    async function changeLoggedInStatus (currentState) {
+    async function changeLoggedInStatus(currentState) {
         await setLoginStatus(currentState)
     }
-
-    useEffect( () => {
-    }, [loginStatus]);
 
     return (
         <>
@@ -40,11 +37,11 @@ function App() {
                     />
                     <Route
                         path="/users"
-                        element={loginStatus ? <UsersTableComponent /> : <AccessDeniedComponent />}
+                        element={loginStatus ? <UsersTableComponent/> : <AccessDeniedComponent/>}
                     />
                     <Route
                         path="/users/:id"
-                        element={loginStatus ? <UserLoginHistoryComponent /> : <AccessDeniedComponent />}
+                        element={loginStatus ? <UserLoginHistoryComponent/> : <AccessDeniedComponent/>}
                     />
                     <Route
                         path="/register"
@@ -57,11 +54,11 @@ function App() {
                     <Route
                         path="/add-another-user"
                         element={loginStatus ?
-                        <FormComponent
-                            title={"Add another user"}
-                            buttonText={"Submit"}
-                            forgotPWLink={false}
-                        /> : <AccessDeniedComponent />}
+                            <FormComponent
+                                title={"Add another user"}
+                                buttonText={"Submit"}
+                                forgotPWLink={false}
+                            /> : <AccessDeniedComponent/>}
                     >
                     </Route>
                     <Route
@@ -82,7 +79,7 @@ function App() {
                     />
                     <Route
                         path="/access-denied"
-                        element={<AccessDeniedComponent />}
+                        element={<AccessDeniedComponent/>}
                     />
                 </Routes>
             </BrowserRouter>

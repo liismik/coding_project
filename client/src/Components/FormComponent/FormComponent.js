@@ -56,17 +56,17 @@ function FormComponent(props) {
         <div>
             {((title !== "Register") && (title !== "Forgot password") && (title !== "Add another user"))
                 ? (
-                    <button>
-                        <Link to="/register" className="linkedButton">Register</Link>
-                    </button>
+                    <Link to="/register" className="linkedButton">
+                        <button>Register</button>
+                    </Link>
                 ) : ((title !== "Login") && (title !== "Confirm account") && (title !== "Add another user")) ? (
-                    <button>
-                        <Link to="/login" className="linkedButton">Login</Link>
-                    </button>
+                    <Link to="/login" className="linkedButton">
+                        <button>Login</button>
+                    </Link>
                 ) : (title === "Add another user") ? (
-                    <button>
-                        <Link to="/users" className="linkedButton">Users</Link>
-                    </button>
+                    <Link to="/users" className="linkedButton">
+                        <button>Users</button>
+                    </Link>
                 )
                 : null
             }

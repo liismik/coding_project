@@ -17,7 +17,7 @@ function PaginationComponent(props) {
     return (
         <div className="paginationButtonsContainer">
             <button onClick={() => handlePageChange("previous")}>{"<"}</button>
-            <span className="pageNumber">{currentPageNumber}</span>
+            <span className="pageNumber">{currentPageNumber}/{totalPages}</span>
             <button onClick={() => handlePageChange("next")}>{">"}</button>
         </div>
     )

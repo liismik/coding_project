@@ -83,9 +83,9 @@ function UsersTableComponent() {
 
     return (
         <>
-            <button>
-                <Link to="/add-another-user" className="linkedButton">Add new user</Link>
-            </button>
+            <Link to="/add-another-user" className="linkedButton">
+                <button>Add new user</button>
+            </Link>
             <h1 className="title">Existing users</h1>
             <div className="usersTable">
                 <table>
