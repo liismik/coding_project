@@ -4,7 +4,7 @@ const postmark = require("postmark");
 const fs = require("fs");
 const path = require("path");
 const Handlebars = require("handlebars");
-const client = new postmark.ServerClient("fd6205c9-41c4-41ae-b4d7-8245db00d1d8");
+const client = new postmark.ServerClient(process.env.postmarkKey);
 const jwt = require("jsonwebtoken");
 require("console");
 
