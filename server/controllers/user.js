@@ -7,7 +7,8 @@ const Handlebars = require("handlebars");
 const client = new postmark.ServerClient("fd6205c9-41c4-41ae-b4d7-8245db00d1d8");
 const jwt = require("jsonwebtoken");
 require("console");
-async function sendEmail(emailValues, fileName, email, subject) {
+
+async function sendEmailToUser(emailValues, fileName, email, subject) {
     const source = fs.readFileSync(path.join(__dirname, "..", "emailTemplates", fileName), "utf8");
     const template = Handlebars.compile(source);
     const html = template(emailValues);
@@ -55,7 +56,7 @@ async function paginate(resultsPerPage, currentPageNumber, paginatableData, stat
 
 module.exports = {
     registerUser: async (req, res) => {
-        const { email, password } = req.body;
+        const { email, password, sendEmail } = req.body;
 
         const accountExists = await User.findOne(
             { "email": email }
@@ -104,14 +105,16 @@ module.exports = {
                 res.json(error)
             })
 
-        /*const emailValidationLink = "http://localhost:3000/confirm-account"; //TODO replace with accurate link after deployment
-        const emailValues = { emailValidationLink:  emailValidationLink };
+        if(sendEmail){
+            const emailValidationLink = "http://localhost:3000/confirm-account";
+            const emailValues = { emailValidationLink:  emailValidationLink };
 
-        try {
-            await sendEmail(emailValues, "registered.hbs", email, "Successful registration to the coding_project!");
-        } catch {
-            res.status(200).json({ message: "Your account has been successfully registered, but no confirmation email was sent out. You can still verify your account at http://localhost:3000/confirm-account"}); //TODO replace link after deployment with correct link
-        }*/
+            try {
+                await sendEmailToUser(emailValues, "registered.hbs", email, "Successful registration to the coding_project!");
+            } catch {
+                res.status(200).json({ message: "Your account has been successfully registered, but no confirmation email was sent out. You can still verify your account at http://localhost:3000/confirm-account"});
+            }
+        }
 
         return res.status(200);
     },
@@ -121,7 +124,7 @@ module.exports = {
         const user = await User.findOne(
             { "email": email }
         )
-        console.log("Here", user)
+
         if (!user)
             return res.status(400).json({ message:"A user with that email does not exist!" });
 
@@ -169,7 +172,7 @@ module.exports = {
         }
     },
     forgotPassword: async (req, res) => {
-        const { email } = req.body;
+        const { email, sendEmail, isTest } = req.body;
 
         const user = await User.findOne(
             { "email": email }
@@ -178,17 +181,26 @@ module.exports = {
         if (!user)
             return res.status(400).json({ message: "A user with that email does not exist!" });
 
-        const newPassword = Math.random().toString(36).slice(-12);
+        let newPassword;
+        let hashedPassword;
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        if(isTest){
+            newPassword = 'TestAccountPassword1209';
+            hashedPassword = await bcrypt.hash(newPassword, 10);
+        } else {
+            newPassword = Math.random().toString(36).slice(-12);
+            hashedPassword = await bcrypt.hash(newPassword, 10)
+        }
 
         await User.findOneAndUpdate(
             {"email": email},
             {"password": hashedPassword}
         )
 
-        /*const emailValues = { newPassword: newPassword };
-        await sendEmail(emailValues, "password-reset.hbs", email, "Password reset");*/
+        if(sendEmail){
+            const emailValues = { newPassword: newPassword };
+            await sendEmailToUser(emailValues, "password-reset.hbs", email, "Password reset");
+        }
 
         return res.status(200).json({ message: "Email containing new password successfully sent!" });
     },
@@ -213,10 +225,13 @@ module.exports = {
         try {
             const user = await User.findById(req.body.userId);
             const email = req.body.currentUserEmail;
+            const sendEmail = req.body.sendEmail;
 
             await User.deleteOne({_id: req.body.userId});
 
-            /*await sendEmail({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");*/
+            if(sendEmail){
+                await sendEmailToUser({ email: user.email }, "account-deletion.hbs", user.email, "Account deletion");
+            }
 
             if(user.email === email) {
                 return res.status(200).json({ deletedOwnAccount: true, message: "User successfully deleted!" });

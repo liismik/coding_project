@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState} from "react";
 import "./App.css";
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import FormComponent from "./Components/FormComponent/FormComponent";
@@ -6,7 +6,7 @@ import UsersTableComponent from "./Components/UsersTableComponent/UsersTableComp
 import UserLoginHistoryComponent from "./Components/UserLoginHistoryComponent/UserLoginHistoryComponent";
 import AccessDeniedComponent from "./Components/AccessDeniedComponent/AccessDeniedComponent";
 
-function App({ t }) {
+function App() {
     const [loginStatus, setLoginStatus] = useState(false);
 
     async function changeLoggedInStatus(currentState) {
