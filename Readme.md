@@ -1,7 +1,7 @@
-SETUP GUIDE
+**SETUP GUIDE**
 // TODO - how to setup and run the application.
 
-BACKEND’s API functions
+**BACKEND’s API functions**
 
 **“/register”** (receives entered email and password)
 * Runs checks on the received
