@@ -39,16 +39,16 @@ function FormComponent(props) {
                 await userAction("/app/login", {email, password}, "/users");
                 return
             case "Register":
-                await userAction("/app/register", {email, password, sendEmail: false}, "/login");
+                await userAction("/app/register", {email, password, sendEmail: true}, "/login");
                 return
             case "Forgot password":
-                await userAction('/app/forgot-password', {email, password, sendEmail: false, isTest: false}, '/login');
+                await userAction('/app/forgot-password', {email, password, sendEmail: true, isTest: false}, '/login');
                 return
             case "Confirm account":
                 await userAction("/app/confirm-account", {email, password}, "/login");
                 return
             case "Add another user":
-                await userAction("/app/register", {email, password, sendEmail: false}, "/users");
+                await userAction("/app/register", {email, password, sendEmail: true}, "/users");
         }
     }
 

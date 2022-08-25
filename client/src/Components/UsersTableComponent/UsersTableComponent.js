@@ -46,7 +46,7 @@ function UsersTableComponent() {
                     {
                         label: "Confirm deletion",
                         onClick: async () => {
-                            await axios.post("/app/users/delete-user", {userId, currentUserEmail, sendEmail: false}, {
+                            await axios.post("/app/users/delete-user", {userId, currentUserEmail, sendEmail: true}, {
                                 headers: {
                                     "x-access-token": localStorage.getItem("token"),
                                 }})
